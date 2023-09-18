@@ -1,27 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import { padNumber, capitalizeFirstLetter } from '../utils/helper';
+import { Ability, Stat, PokemonDetailsProps } from '../types'
 
-const PokemonDetails = ({data}) => {
-  const { name } = useParams();
-  const [pokemonDetails, setPokemonDetails] = useState(null);
+const PokemonDetails: React.FC<PokemonDetailsProps> = ({ data }) => {
+  const { name } = useParams < { name: string } > ();
+  const [pokemonDetails, setPokemonDetails] = useState < {
+    name: string;
+    id: number;
+    height: number;
+    weight: number;
+    abilities: Ability[];
+    stats: Stat[];
+  } | null > (null);
 
-  useEffect(()=>{
-    setPokemonDetails(...data.filter(item => item.name == name))
-  },[])
+  useEffect(() => {
+    const foundPokemon = data.find((item) => item.name === name);
+    if (foundPokemon) {
+      setPokemonDetails(foundPokemon);
+    }
+  }, [data, name]);
 
   if (!pokemonDetails) {
     return <p>Loading...</p>;
   }
 
-  const abilities = pokemonDetails.abilities.map(ability => (
+  const abilities = pokemonDetails.abilities.map((ability) => (
     <span key={ability.ability.name} className="ability">
       {capitalizeFirstLetter(ability.ability.name)}
     </span>
   ));
 
-  const stats = pokemonDetails.stats.map(stat => (
+  const stats = pokemonDetails.stats.map((stat) => (
     <div key={stat.stat.name} className="stat">
       <p className="stat-label">{capitalizeFirstLetter(stat.stat.name)}:</p>
       <p className="stat-value">{stat.base_stat}</p>
@@ -32,7 +42,13 @@ const PokemonDetails = ({data}) => {
     <div className="pokemon-details-container">
       <div className="pokemon-details">
         <h2>{capitalizeFirstLetter(pokemonDetails.name)}</h2>
-        <img src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${padNumber(pokemonDetails.id, 3)}.png`} alt={pokemonDetails.name} />
+        <img
+          src={`https://assets.pokemon.com/assets/cms2/img/pokedex/full/${padNumber(
+            pokemonDetails.id,
+            3
+          )}.png`}
+          alt={pokemonDetails.name}
+        />
         <div className="details-group">
           <p className="details-label">Height:</p>
           <p className="details-value">{pokemonDetails.height}</p>
@@ -51,7 +67,9 @@ const PokemonDetails = ({data}) => {
         </div>
       </div>
       <div className="back-button">
-        <Link to="/" className="link">Back to List</Link>
+        <Link to="/" className="link">
+          Back to List
+        </Link>
       </div>
     </div>
   );
